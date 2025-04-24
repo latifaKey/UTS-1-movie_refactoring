@@ -37,46 +37,6 @@ class MovieController extends Controller
         return view('input', compact('categories'));
     }
 
-    public function store(Request $request)
-    {
-        // Validasi data
-        $validator = Validator::make($request->all(), [
-            'id' => ['required', 'string', 'max:255', Rule::unique('movies', 'id')],
-            'judul' => 'required|string|max:255',
-            'category_id' => 'required|integer',
-            'sinopsis' => 'required|string',
-            'tahun' => 'required|integer',
-            'pemain' => 'required|string',
-            'foto_sampul' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-        // Jika validasi gagal, kembali ke halaman input dengan pesan kesalahan
-        if ($validator->fails()) {
-            return redirect('movies/create')
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $randomName = Str::uuid()->toString();
-        // $fileExtension = $request->file('foto_sampul')->getClientOriginalExtension();
-        $fileExtension = 'jpg';
-        $fileName = $randomName . '.' . $fileExtension;
-
-        // Simpan file foto ke folder public/images
-        $request->file('foto_sampul')->move(public_path('images'), $fileName);
-        // Simpan data ke table movies
-        Movie::create([
-            'id' => $request->id,
-            'judul' => $request->judul,
-            'category_id' => $request->category_id,
-            'sinopsis' => $request->sinopsis,
-            'tahun' => $request->tahun,
-            'pemain' => $request->pemain,
-            'foto_sampul' => $fileName,
-        ]);
-
-        return redirect('/')->with('success', 'Data berhasil disimpan');
-    }
-
     public function data()
     {
         $movies = Movie::latest()->paginate(10);
